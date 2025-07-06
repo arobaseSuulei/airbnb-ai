@@ -40,14 +40,21 @@ export default function Navbar() {
     </div>
 
 
+    <div className="flex justify-center mt-12 ">  
+      <div className="flex items-center rounded-full w-1/2 p-2 shadow-md  border-[0.2px] border-gray-300">
+    <img
+      className="w-12"
+      src="https://brandlogos.net/wp-content/uploads/2025/02/apple_intelligence-logo_brandlogos.net_zmypw.png"
+      alt="logo"
+    />
+     <div className="flex justify-center items-center flex-1 text-center">
+      11
+    </div>
+  </div>
+</div>
 
 
-    <div className="flex justify-center mt-12">
-        <p className="rounded-full w-1/2 p-4 bg-red-400 text-center text-white">
-             11
-        </p>
-         
-         </div>
+    
 
 
     </div>
