@@ -8,7 +8,65 @@ const supabase = createClient(
 
 const AI_LOGO = "https://brandlogos.net/wp-content/uploads/2025/02/apple_intelligence-logo_brandlogos.net_zmypw.png";
 
+// Fonction utilitaire pour afficher images et texte
+function renderMessageContent(content) {
+  // Regex pour liens d'image bruts
+  const imageRegex = /(https?:\/\/\S+\.(?:png|jpe?g|gif)|https?:\/\/source\.unsplash\.com\/[^\s)]+)/gi;
+  // Regex pour liens markdown [texte](url)
+  const markdownImageRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/gi;
+
+  // Cherche les liens markdown d'abord
+  let parts = [];
+  let lastIndex = 0;
+  let match;
+  while ((match = markdownImageRegex.exec(content)) !== null) {
+    // Ajoute le texte avant le lien
+    if (match.index > lastIndex) {
+      parts.push(content.slice(lastIndex, match.index));
+    }
+    // Si l'URL est une image ou unsplash, affiche l'image
+    if (/(\.png|\.jpe?g|\.gif|source\.unsplash\.com)/i.test(match[2])) {
+      parts.push(<img key={match[2]+match.index} src={match[2]} alt={match[1]} style={{maxWidth: 300, borderRadius: 8, marginTop: 8}} />);
+    } else {
+      // Sinon, affiche le lien markdown normal
+      parts.push(<a key={match[2]+match.index} href={match[2]} target="_blank" rel="noopener noreferrer">{match[1]}</a>);
+    }
+    lastIndex = markdownImageRegex.lastIndex;
+  }
+  // Ajoute le reste du texte après le dernier lien
+  if (lastIndex < content.length) {
+    parts.push(content.slice(lastIndex));
+  }
+
+  // Si on a trouvé des liens markdown, affiche le résultat
+  if (parts.length > 1) {
+    return <div>{parts.map((p, i) => <span key={i}>{p}</span>)}</div>;
+  }
+
+  // Sinon, on traite les liens bruts comme avant
+  const matches = [...content.matchAll(imageRegex)];
+  if (matches.length > 0) {
+    const textWithoutLinks = content.replace(imageRegex, '').trim();
+    return (
+      <div>
+        {textWithoutLinks && <span>{textWithoutLinks}</span>}
+        {matches.map((match, idx) => (
+          <div key={idx} style={{marginTop: 8}}>
+            <img src={match[0]} alt="Image IA" style={{maxWidth: 300, borderRadius: 8}} />
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return <span>{content}</span>;
+}
+
+
+
+
 export default function ChatBox() {
+
+  
   const [messages, setMessages] = useState([]);
 
   async function getMessages() {
@@ -41,21 +99,10 @@ export default function ChatBox() {
     <div className=" p-24 flex items-center justify-center">
       <div className="w-full max-w-2xl p-6 bg-white rounded-xl ">
         <h1 className="text-xs flex gap-2 items-center justify-center my-8 text-gray-700">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="size-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"
-            />
-          </svg>
-          Powered by AI chat
+          
+          
+          Powered by
+         <img className="w-16" src="https://1000logos.net/wp-content/uploads/2025/02/Grok-Logo.png"/>
         </h1>
 
         <div className="border border-gray-200 rounded-lg bg-gray-50">

@@ -1,6 +1,7 @@
 import os
 from openai import OpenAI
 from supabase import create_client, Client
+import re
 
 
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://pxyqknxfvimxdcmplbff.supabase.co")
@@ -13,7 +14,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 client = OpenAI(
   base_url="https://openrouter.ai/api/v1",
-  api_key="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",
+  api_key="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",
 )
 
 def get_conversation_history():
@@ -62,7 +63,7 @@ def generate_ai_response(conversation_history, hotels):
         messages = [
             {
                 "role": "system",
-                "content": f"You are Airbnb AI. Available hotels: {hotels}. Be VERY concise - max 2-3 sentences. Avoid using start in punctuation No long explanations. Just answer the question directly."
+                "content": f"You are Airbnb AI. Available hotels: {hotels}. Be VERY concise - max 2-3 sentences. No long explanations. Just answer the question directly.\nIf the user wants to book a hotel, respond ONLY with the following Python code (and nothing else): supabase.table(\"hotels\").update({{\"booked\": True, \"name\": '<user_name>'}}).eq(\"id\", <hotel_id>).execute()  Replace <user_name> and <hotel_id> with the correct values. Only output this code if the user clearly wants to book. after that confirm to the user"
             }
         ]
         
@@ -111,6 +112,18 @@ def save_ai_response(response):
     except Exception as e:
         print(f"Erreur lors de la sauvegarde: {e}")
 
+def handle_supabase_update(ai_response):
+    # Cherche le pseudo-code Python Supabase généré par l'IA
+    match = re.search(r'supabase\.table\("hotels"\)\.update\(\{\\?"booked\\?": True, \\"name\\?": [\'"]([^\'"]+)[\'"]\}\)\.eq\("id", (\d+)\)\.execute\(\)', ai_response)
+    if match:
+        user_name = match.group(1)
+        hotel_id = int(match.group(2))
+        try:
+            supabase.table("hotels").update({"booked": True, "name": user_name}).eq("id", hotel_id).execute()
+            print(f"Réservation effectuée pour l'hôtel {hotel_id} au nom de {user_name}")
+        except Exception as e:
+            print(f"Erreur lors de la réservation: {e}")
+
 # Fonction principale
 def main():
     # Récupérer l'historique complet de la conversation
@@ -124,6 +137,9 @@ def main():
     # Générer la réponse IA avec l'historique complet
     ai_response = generate_ai_response(conversation_history, hotels)
     print(f"Réponse IA: {ai_response}")
+    
+    # Exécuter la requête SQL si présente
+    handle_supabase_update(ai_response)
     
     # Sauvegarder la réponse dans Supabase
     save_ai_response(ai_response)
