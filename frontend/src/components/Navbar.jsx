@@ -47,8 +47,8 @@ export default function Navbar() {
       src="https://brandlogos.net/wp-content/uploads/2025/02/apple_intelligence-logo_brandlogos.net_zmypw.png"
       alt="logo"
     />
-     <div className="flex justify-center items-center flex-1 text-center">
-      11
+     <div className="flex  text-xs justify-center items-center flex-1 text-center">
+     
     </div>
   </div>
 </div>

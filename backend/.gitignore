@@ -1,0 +1,19 @@
+# Environnement virtuel Python
+venv/
+
+# Fichiers de configuration d'environnement
+.env
+.env.*
+
+# Fichiers Python compilés
+__pycache__/
+*.pyc
+
+# Fichiers système
+.DS_Store
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Autres fichiers temporaires
+*.log 

@@ -1,22 +1,23 @@
-from openai import OpenAI
+from supabase import create_client, Client
+import os
 
-client = OpenAI(
-  base_url="https://openrouter.ai/api/v1",
-  api_key="c4350a479294148d8deb21025246858a390a06d80af886bfaa12c4efd6060d82",
-)
 
-completion = client.chat.completions.create(
-  extra_headers={
-    "HTTP-Referer": "<YOUR_SITE_URL>", # Optional. Site URL for rankings on openrouter.ai.
-    "X-Title": "<YOUR_SITE_NAME>", # Optional. Site title for rankings on openrouter.ai.
-  },
-  extra_body={},
-  model="x-ai/grok-3-mini",
-  messages=[
-    {
-      "role": "user",
-      "content": "What is the meaning of life?"
-    }
-  ]
-)
-print(completion.choices[0].message.content)
+
+# Renseigne tes propres clés ici ou utilise des variables d'environnement
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://pxyqknxfvimxdcmplbff.supabase.co")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4eXFrbnhmdmlteGRjbXBsYmZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjkzMDM4NjIsImV4cCI6MjA0NDg3OTg2Mn0.cuq3c8ejHCSky7BcV1qlj76_QYWcYXYiAbvDolxN6Uk")
+
+# Connexion à Supabase
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# Exemple : récupérer toutes les lignes de la table 'airbnb'
+def fetch_airbnb_messages():
+    response = supabase.table("airbnb").select("*").execute()
+    if response.data:
+        for row in response.data:
+            print(f"[{row['role']}] {row['content']}")
+    else:
+        print("Aucune donnée trouvée.")
+
+if __name__ == "__main__":
+    fetch_airbnb_messages()
